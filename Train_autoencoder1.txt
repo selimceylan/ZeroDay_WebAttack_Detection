@@ -1,0 +1,137 @@
+!pip install numpy
+!pip install scikit-learn==1.0.2
+!pip install scipy
+!pip install seaborn==0.11.2
+!pip install tensorflow==2.8.0
+import numpy as np
+import pandas as pd
+import sys
+import re
+import json
+import matplotlib.pyplot as plt
+from numpy.random import seed
+import tensorflow as tf
+from sklearn.model_selection import train_test_split
+from keras.layers import Input, Dropout, Dense, LSTM, TimeDistributed, RepeatVector
+from keras.models import Model
+from keras import regularizers
+
+!unzip /content/xx_last.zip
+!nvidia-smi
+
+sys.path.append("/content/AutoencoderWithASCII")
+from AutoencoderWithASCII.utils import get_requests_from_file,batch_generator,one_by_one_generator
+from AutoencoderWithASCII.vocab import Vocabulary
+from AutoencoderWithASCII.reader import read
+from AutoencoderWithASCII.model import autoencoder_model
+
+seed(10)
+tf.random.set_seed(10)
+#Read data.
+data_path = "/content/AutoencoderWithASCII/datasets/vulnbank_train.txt"
+data_array = read(data_path)
+
+#Divide data into train and test.
+data_train,data_test = train_test_split(data_array,test_size=0.2,random_state=0)
+print("Number of train datas:",data_train.shape[0])
+print("Number of test datas:",data_test.shape[0])
+
+
+# reshape inputs for LSTM [samples, timesteps, features]
+X_train = data_train.reshape(data_train.shape[0], 1, data_train.shape[1])
+print("Training data shape:", X_train.shape)
+X_test = data_test.reshape(data_test.shape[0], 1, data_test.shape[1])
+print("Test data shape:", X_test.shape)
+# create the autoencoder model
+model = autoencoder_model(X_train)
+model.compile(optimizer='adam', loss='mae')
+model.summary()
+
+
+# fit the model to the data
+nb_epochs = 100
+batch_size = 10
+history = model.fit(X_train, X_train, epochs=nb_epochs, batch_size=batch_size,
+                    validation_split=0.05).history
+
+
+# plot the training losses
+fig, ax = plt.subplots(figsize=(14, 6), dpi=80)
+ax.plot(history['loss'], 'b', label='Train', linewidth=2)
+ax.plot(history['val_loss'], 'r', label='Validation', linewidth=2)
+ax.set_title('Model loss', fontsize=16)
+ax.set_ylabel('Loss (mae)')
+ax.set_xlabel('Epoch')
+ax.legend(loc='upper right')
+plt.show()
+
+# calculate the loss on the test set
+X_pred = model.predict(X_test)
+X_pred = X_pred.reshape(X_pred.shape[0], X_pred.shape[2])
+data_test = pd.DataFrame(data_test)
+X_pred = pd.DataFrame(X_pred, columns=data_test.columns)
+X_pred.index = data_test.index
+
+scored = pd.DataFrame(index=data_test.index)
+Xtest = X_test.reshape(X_test.shape[0], X_test.shape[2])
+scored['Loss_mae'] = np.mean(np.abs(X_pred-Xtest), axis = 1)
+scored['Threshold'] = 0.275
+scored['Anomaly'] = scored['Loss_mae'] > scored['Threshold']
+scored.head()
+
+count=0
+for i in range(0,len(scored)):
+  if(np.asarray(scored)[i,2]==False):
+    count=count+1
+print("Number of FN",count)  
+
+------------------------------------------
+data_array_anom = read("/content/AutoencoderWithASCII/datasets/vulnbank_anomaly.txt")
+X_test_anom = data_array_anom.reshape(data_array_anom.shape[0], 1, data_array_anom.shape[1])
+
+
+X_pred = model.predict(X_test_anom)
+X_pred = X_pred.reshape(X_pred.shape[0], X_pred.shape[2])
+data_array_anom = pd.DataFrame(data_array_anom)
+X_pred = pd.DataFrame(X_pred, columns=data_array_anom.columns)
+X_pred.index = data_array_anom.index
+
+scored = pd.DataFrame(index=data_array_anom.index)
+Xtest = X_test_anom.reshape(X_test_anom.shape[0], X_test_anom.shape[2])
+scored['Loss_mae'] = np.mean(np.abs(X_pred-Xtest), axis = 1)
+scored['Threshold'] = 14
+scored['Anomaly'] = scored['Loss_mae'] > scored['Threshold']
+scored.head()
+
+
+count=0
+for i in range(0,len(scored)):
+  if(np.asarray(scored)[i,2]==True):
+    count=count+1
+print("Number of TP",count)  
+------------------------------------------
+
+
+# plot the loss distribution of the training set
+import seaborn as sns
+X_pred = model.predict(X_train)
+X_pred = X_pred.reshape(X_pred.shape[0], X_pred.shape[2])
+data_train = pd.DataFrame(data_train)
+X_pred = pd.DataFrame(X_pred, columns=data_train.columns)
+X_pred.index = data_train.index
+
+scored = pd.DataFrame(index=data_train.index)
+Xtrain = X_train.reshape(X_train.shape[0], X_train.shape[2])
+scored['Loss_mae'] = np.mean(np.abs(X_pred-Xtrain), axis = 1)
+plt.figure(figsize=(16,9), dpi=80)
+plt.title('Loss Distribution', fontsize=16)
+sns.distplot(scored['Loss_mae'], bins = 20, kde= True, color = 'blue');
+plt.xlim([0.0,20])
+
+
+
+# save all model information, including weights, in h5 format
+model.save("Cloud_model.h5")
+print("Model saved")
+
+
