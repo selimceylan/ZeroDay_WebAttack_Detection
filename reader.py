@@ -1,4 +1,3 @@
-# from __future__ import print_function
 import random
 import numpy as np
 
@@ -37,7 +36,7 @@ def read(data_path):
         data_eliminated.append(data[i])
     print(len(data_eliminated),"data_eliminated length")
 
-    data_array = np.zeros((len(data_eliminated),1200),dtype=int)#Some requests (specially starting with POST) were  concatenated. They length is over 1000.
+    data_array = np.zeros((len(data_eliminated),1200),dtype=int)
     for i in range(0,len(data_eliminated)):#Investigate 789.
         data_array[i,:len(process_request(data_eliminated[i],vocab)[0])] = process_request(data_eliminated[i],vocab)[0]
 
