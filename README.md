@@ -25,6 +25,8 @@ A json file created which includes vocabulary based on ASCII. Every character ha
 4- Link break is "/r" and tab is "t".\
 ![image](https://user-images.githubusercontent.com/86148100/171168386-2ce6ea47-aff8-4fcc-9596-65fdd41681b2.png)
 
+Constant request length is specified as 1200 characters. The requests which has character more than 1200, eliminated.\
+Every http requests starts with "ST@RT" and ends with "END". Requests take by one by with re.compile() method according to the "ST@RT" and "END" statements.
 
 ## Citation
 Article:
@@ -44,4 +46,27 @@ Article:
   howpublished={\url{https://github.com/vulnbank/vulnbank }}\
 
 ## Results
+Model trained with these hyperparameters:\
+Batch size = 10\
+Epoch = 100\
+Optimizer = Adam\
+Loss function = MAE\
+Validation split = 0.1
+
+Loss Graph:\
+![indir (1)](https://user-images.githubusercontent.com/86148100/171281276-908dd145-db1f-4243-8e76-b78e74bd74cc.png)
+
+Malicious dataset consist of 1097 requests and model detects 1094 of them with threshold specified below.\
+Benign dataset consist of 21991, of which 2462 were eliminated due to their length. 3906 benign requests is initially reserved and not used for training. Model finds correctly 3779 of them from 3906. False positives are 127.
+
+### Determining of Optimum Threshold
+Threshold classifies malicious and benign requests. Model predict a loss value for each request. Loss values that greater than the threshold are malicious and vice versa for benign. To find the most compatible threshold value, this formula can be used:\
+threshold = mean(total loss)+ C * std(total loss)\
+C value is depend on the dataset.
+
+Threshold can find with loss distribution as you can see in this graph:
+![indir (2)](https://user-images.githubusercontent.com/86148100/171281522-c6a8e93b-b498-40d3-a97f-a44ee9a68c87.png)
+
+For this dataset, threshold was chosen as 10.
+
 
