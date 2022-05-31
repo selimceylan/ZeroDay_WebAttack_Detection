@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import time
 
-model = load_model('C:\\Users\\slmcy\\Downloads\\Cloud_model3_best.h5')
+model = load_model('../Cloud_model_best.h5')
 
 #Read data.
 data_path = "datasets/vulnbank_train.txt"
@@ -52,6 +52,12 @@ for i in range(0,len(scored)):
     count=count+1
 print("Number of TN",count)
 
+count=0
+for i in range(0,len(scored)):
+  if(np.asarray(scored)[i,2]==True):
+    count=count+1
+print("Number of FP",count)
+
 #-----------------------------------------------------------------------------#
 
 # plot the training losses
@@ -64,37 +70,36 @@ print("Number of TN",count)
 # ax.legend(loc='upper right')
 # plt.show()
 
-# data_array_anom = read("datasets/vulnbank_anomaly.txt")
-# X_test_anom = data_array_anom.reshape(data_array_anom.shape[0], 1, data_array_anom.shape[1])
-#
-# start = time.time()
-# X_pred = model.predict(X_test_anom)
-# middle = time.time()
-# X_pred = X_pred.reshape(X_pred.shape[0], X_pred.shape[2])
-# data_array_anom = pd.DataFrame(data_array_anom)
-# X_pred = pd.DataFrame(X_pred, columns=data_array_anom.columns)
-# X_pred.index = data_array_anom.index
-#
-# scored = pd.DataFrame(index=data_array_anom.index)
-# Xtest = X_test_anom.reshape(X_test_anom.shape[0], X_test_anom.shape[2])
-# scored['Loss_mae'] = np.mean(np.abs(X_pred-Xtest), axis = 1)
-# scored['Threshold'] = 10
-# scored['Anomaly'] = scored['Loss_mae'] > scored['Threshold']
-# scored.head()
-# end = time.time()
-# print(end-start,"pred time")
-#
-# sum = 0
-# for i in range(0,len(scored)):
-#     sum += np.asarray(scored)[i][0]
-#
-# mean_malicious=sum/1097
-# print("Mean of malicious losses:",mean_malicious)
-#
-# count=0
-# for i in range(0,len(scored)):
-#   if(np.asarray(scored)[i,2]==True):
-#     count=count+1
-# print("Number of TP",count)
+data_array_anom = read("datasets/vulnbank_anomaly.txt")
+X_test_anom = data_array_anom.reshape(data_array_anom.shape[0], 1, data_array_anom.shape[1])
+
+start = time.time()
+X_pred = model.predict(X_test_anom)
+middle = time.time()
+X_pred = X_pred.reshape(X_pred.shape[0], X_pred.shape[2])
+data_array_anom = pd.DataFrame(data_array_anom)
+X_pred = pd.DataFrame(X_pred, columns=data_array_anom.columns)
+X_pred.index = data_array_anom.index
+
+scored = pd.DataFrame(index=data_array_anom.index)
+Xtest = X_test_anom.reshape(X_test_anom.shape[0], X_test_anom.shape[2])
+scored['Loss_mae'] = np.mean(np.abs(X_pred-Xtest), axis = 1)
+scored['Threshold'] = 10
+scored['Anomaly'] = scored['Loss_mae'] > scored['Threshold']
+scored.head()
+end = time.time()
+print(end-start,"pred time")
 
 
+
+count=0
+for i in range(0,len(scored)):
+  if(np.asarray(scored)[i,2]==True):
+    count=count+1
+print("Number of TP",count)
+
+count = 0
+for i in range(0,len(scored)):
+  if(np.asarray(scored)[i,2]==False):
+    count=count+1
+print("Number of FN",count)
