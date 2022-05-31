@@ -1,4 +1,4 @@
-# ZeroDay_WebAttack_Detection
+# Zero-day Web Attack Detection
 Cloud technologies arises and more people are beginning to migrate their applications and personal data to the cloud. This makes web-based applications an attractive target for cyber-attacks. This github repository includes a deep learning model to solve this problem, leveraging a recent article. Model takes http requests as an input and detects web attacks through them.
 
 ## Model
@@ -12,9 +12,17 @@ A sequence to sequence model consists of two multilayered long short-term memory
 It is difficult to find malicious http requests in sufficient numbers and with varying characteristics. On the other hand, when a model is developed with the malicious dataset, it will be difficult to detect zero-day attacks.
 
 Thanks to autoencoder that finds anomalies:
-- Anomaly detection autoencoder models inputs and outputs are the same. There is no need to malicious http requests dataset.
+- Anomaly detection autoencoder models inputs and outputs are the same. Model trains with benign requests. There is no need to malicious requests.
 - Model learns the semantic information of the benign requests. It means model can detect zero-day attacks.
 
 In this repo dataset obtained from VulnBank. Model needs roughly 20000 benign request for training.
 
+## Prepare dataset
+A json file created which includes vocabulary based on ASCII. Every character has an index value and some special charecters added.\
+1- Decoding sequence starts with "GO" and ends with "EOS".\
+2- The characters wihch are not defined in vocabulary are "UNK".\
+3- Models takes constant input size therefore size is defined before training. "PAD" is the filler for empty parts.\
+4- Link break is "/r" and tab is "t".
+
 ## Results
+
