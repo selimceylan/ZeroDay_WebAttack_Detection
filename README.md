@@ -17,12 +17,28 @@ Thanks to autoencoder that finds anomalies:
 
 In this repo dataset obtained from VulnBank. Model needs roughly 20000 benign request for training.
 
-## Prepare dataset
+## Prepare Dataset
 A json file created which includes vocabulary based on ASCII. Every character has an index value and some special charecters added.\
 1- Decoding sequence starts with "GO" and ends with "EOS".\
 2- The characters wihch are not defined in vocabulary are "UNK".\
 3- Models takes constant input size therefore size is defined before training. "PAD" is the filler for empty parts.\
 4- Link break is "/r" and tab is "t".
+## Citation
+Article:
+> title={Network attack detection and visual payload labeling technology based on Seq2Seq architecture with attention mechanism},\
+  authors={Fan Shi, Pengcheng Zhu, Xiangyu Zhou, Bintao Yuan and Yong Fang},\
+  year={2020},\
+  journal={International Journal of Distributed Sensor Networks},\
+  howpublished={\url{https://journals.sagepub.com/doi/pdf/10.1177/1550147720917019 }}\
+  
+  Dataset:
+  > @misc{vulnbank,\
+  title={Vulnerable application for security issues demo},\
+  authors={vulnbank, Mikhail Golovanov},\
+  year={2019},\
+  publisher={Github},\
+  journal={GitHub repository},\
+  howpublished={\url{https://github.com/vulnbank/vulnbank }}\
 
 ## Results
 
