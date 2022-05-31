@@ -22,7 +22,10 @@ A json file created which includes vocabulary based on ASCII. Every character ha
 1- Decoding sequence starts with "GO" and ends with "EOS".\
 2- The characters wihch are not defined in vocabulary are "UNK".\
 3- Models takes constant input size therefore size is defined before training. "PAD" is the filler for empty parts.\
-4- Link break is "/r" and tab is "t".
+4- Link break is "/r" and tab is "t".\
+![image](https://user-images.githubusercontent.com/86148100/171168386-2ce6ea47-aff8-4fcc-9596-65fdd41681b2.png)
+
+
 ## Citation
 Article:
 > title={Network attack detection and visual payload labeling technology based on Seq2Seq architecture with attention mechanism},\
